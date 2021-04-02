@@ -39,7 +39,7 @@ r = 0.04
 
 count = 0
 mod = 6
-issix = False
+
 while current_savings <= portion_down_payment:
     if count != 1 and count % mod == 1:
         annual_salary *= 1 + semi_annual_raise
