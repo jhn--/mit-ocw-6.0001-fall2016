@@ -95,6 +95,12 @@ def get_available_letters(letters_guessed):
     return ('').join([letter for letter in alphabet if letter not in letters_guessed])
 
 
+def you_win(secret_word, guesses):
+    points = len(set(secret_word)) * guesses
+    win = f"Congratulations, you won!\nYour total score for this game is: {points}"
+    return win
+
+
 def hangman(secret_word):
     '''
     secret_word: string, the secret word to guess.
@@ -177,7 +183,7 @@ def hangman(secret_word):
                     # print(f"{letters_guessed}")
                     print('-------------')
         else:
-            print('EH U GOT IT w00t w00t!')
+            print(you_win(secret_word, guesses))
             return True
             # When you've completed your hangman function, scroll down to the bottom
             # of the file and uncomment the first two lines to test
