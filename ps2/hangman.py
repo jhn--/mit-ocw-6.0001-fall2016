@@ -190,7 +190,7 @@ def hangman(secret_word):
             # (hint: you might want to pick your own
             # secret_word while you're doing your own testing)
             # -----------------------------------
-    print(f"AW MAN YOU FAILED: THE WORD IS '{secret_word}'")
+    print(f"Sorry, you ran out of guesses. The word was {secret_word}.")
     return False
 
 
@@ -203,8 +203,17 @@ def match_with_gaps(my_word, other_word):
         _ , and my_word and other_word are of the same length;
         False otherwise: 
     '''
-    # FILL IN YOUR CODE HERE AND DELETE "pass"
-    pass
+    my_word = ('').join(my_word.split()
+                        )  # removed the " " spaces and join them back...
+    if len(my_word) != len(other_word):  # so that we can properly compare the length
+        return False
+    else:
+        for i in range(len(my_word)):
+            if (my_word[i] != "_") and my_word[i] != other_word[i]:
+                return False
+            else:
+                continue
+    return True
 
 
 def show_possible_matches(my_word):
