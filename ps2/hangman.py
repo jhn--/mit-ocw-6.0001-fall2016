@@ -40,7 +40,7 @@ def choose_word(wordlist):
 
     Returns a word from wordlist at random
     """
-    # return "abc"
+    # return "tact"
     return random.choice(wordlist)
 
 # end of helper code
@@ -194,17 +194,26 @@ def hangman(secret_word):
     return False
 
 
+def remove_word_spaces(my_word):
+    '''
+    my_word: string with _ and ' ' (space) characters, current guess of secret word
+    returns: string with ' ' (space) characters removed
+    '''
+    return ('').join(my_word.split())
+
+
 def match_with_gaps(my_word, other_word):
     '''
     my_word: string with _ characters, current guess of secret word
     other_word: string, regular English word
-    returns: boolean, True if all the actual letters of my_word match the 
+    returns: boolean, True if all the actual letters of my_word match the
         corresponding letters of other_word, or the letter is the special symbol
         _ , and my_word and other_word are of the same length;
-        False otherwise: 
+        False otherwise:
     '''
-    my_word = ('').join(my_word.split()
-                        )  # removed the " " spaces and join them back...
+    if ' ' in my_word:
+        # removed the " " spaces and join them back...
+        my_word = remove_word_spaces(my_word)
     if len(my_word) != len(other_word):  # so that we can properly compare the length
         return False
     else:
@@ -227,7 +236,12 @@ def show_possible_matches(my_word):
 
     '''
     # FILL IN YOUR CODE HERE AND DELETE "pass"
-    pass
+    possible_matches = [word for word in wordlist if match_with_gaps(
+        my_word, word) == True]
+    if len(possible_matches) == 0:
+        print("No matches found")
+    else:
+        print(possible_matches)
 
 
 def hangman_with_hints(secret_word):
@@ -236,7 +250,7 @@ def hangman_with_hints(secret_word):
 
     Starts up an interactive game of Hangman.
 
-    * At the start of the game, let the user know how many 
+    * At the start of the game, let the user know how many
       letters the secret_word contains and how many guesses s/he starts with.
 
     * The user should start with 6 guesses
@@ -246,14 +260,14 @@ def hangman_with_hints(secret_word):
 
     * Ask the user to supply one guess per round. Make sure to check that the user guesses a letter
 
-    * The user should receive feedback immediately after each guess 
+    * The user should receive feedback immediately after each guess
       about whether their guess appears in the computer's word.
 
-    * After each guess, you should display to the user the 
+    * After each guess, you should display to the user the
       partially guessed word so far.
 
     * If the guess is the symbol *, print out all words in wordlist that
-      matches the current guessed word. 
+      matches the current guessed word.
 
     Follows the other limitations detailed in the problem write-up.
     '''
