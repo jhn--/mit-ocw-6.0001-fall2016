@@ -13,7 +13,7 @@ import string
 
 VOWELS = 'aeiou'
 CONSONANTS = 'bcdfghjklmnpqrstvwxyz'
-HAND_SIZE = 7
+HAND_SIZE = 6  # reduce from 7 to make space for asterix '*'
 
 SCRABBLE_LETTER_VALUES = {
     'a': 1, 'b': 3, 'c': 3, 'd': 2, 'e': 1, 'f': 4, 'g': 2, 'h': 4, 'i': 1, 'j': 8, 'k': 5, 'l': 1, 'm': 3, 'n': 1, 'o': 1, 'p': 3, 'q': 10, 'r': 1, 's': 1, 't': 1, 'u': 1, 'v': 4, 'w': 4, 'x': 8, 'y': 4, 'z': 10
@@ -99,7 +99,10 @@ def get_word_score(word, n):
         word = word.lower()
         score = 0
         for i in word:
-            score += SCRABBLE_LETTER_VALUES[i]
+            if i == '*':
+                pass
+            else:
+                score += SCRABBLE_LETTER_VALUES[i]
         return score
 
     def component_2(word, n):
@@ -156,7 +159,7 @@ def deal_hand(n):
     """
 
     hand = {}
-    num_vowels = int(math.ceil(n / 3))
+    num_vowels = int(math.ceil(n / 4))
 
     for i in range(num_vowels):
         x = random.choice(VOWELS)
@@ -165,6 +168,8 @@ def deal_hand(n):
     for i in range(num_vowels, n):
         x = random.choice(CONSONANTS)
         hand[x] = hand.get(x, 0) + 1
+
+    hand['*'] = 1
 
     return hand
 
@@ -202,9 +207,9 @@ def update_hand(hand, word):
         if letter in hand.keys():  # if letter in word is also in hand
             # if letter count in word < letter count in hand
             if hand[letter] - word_dic[letter] > 0:
-                # 'copy' the remaining count of letters from hand to new_hand
+                # 'copy' the letters from hand to new_hand if remaining _count_ is greater than 0
                 new_hand[letter] = hand[letter] - word_dic[letter]
-                # delete letter from hand_copy, leaving hand untouched
+            # delete letter from hand_copy, leaving hand untouched
             del hand_copy[letter]
 
     for letter in hand_copy.keys():
@@ -228,8 +233,97 @@ def is_valid_word(word, hand, word_list):
     word_list: list of lowercase strings
     returns: boolean
     """
+    word = word.lower()
+    word_dic = get_frequency_dict(word)
+    aeoiu = {
+        'a': 0,
+        'e': 0,
+        'i': 0,
+        'o': 0,
+        'u': 0
+    }
 
-    pass  # TO DO... Remove this line when you implement this function
+    # pass  # TO DO... Remove this line when you implement this function
+    def check_hand(word_dic):
+        for letter in word_dic.keys():
+            if letter == "*":
+                pass
+            if letter not in hand.keys():
+                return False
+            elif word_dic[letter] > hand[letter]:
+                return False
+        return True
+
+    def check_word_list(word, word_list):
+        # narrow down the search, use memory to contain
+        # a list of words that has the same length as word
+        word_list_of_same_length = [
+            w for w in word_list if len(w) == len(word)]
+        # get the position of the '*' in the word
+        index_of_wildcard = word.find('*')
+
+        if '*' in word:
+            word_split = word.split('*')
+            # i am DEFINITELY DOING SOMETHING INEFFICIENT here
+            # i split the word into two - separated by the '*' character
+            # then for both parts - which has a position in the word -
+            # ie. 'sn*il': ['sn'] HAS to be at position 0
+            # ['il'] HAS to be 3
+            # once i have ascertained that we do have words that has ['sn'] at position
+            # AND
+            # ['il'] at position 3
+            # I'll push all these words into a variable call word_list_w_wildcard
+            #
+            # why am i punishing myself like this? -.-"
+            #
+            # i cannot be sure (and i hate it) but it _feels_ like
+            # while it is easier to check existence of words when '*' is in the first or last
+            # position, checking if potential words exists when '*' is in the middle
+            # will incur more 'if-else's.
+            # so i came up w an approach checks the existence of combinations
+            # in their exact locations in the other parts of the potential words
+            # while keeping track of the position of '*'
+            # in order to make sure that the letters of those potential words in that exact
+            # position as '*' are vowels
+            #
+            # the simpler way, but ... feels like a more 'brute-forcey' way
+            # will be to substitute '*' which every letter in VOWELS and make multiple
+            # loops through either world_list or word_list_of_same_length,
+            # keeping a count of successful results,
+            # verifying the count is not 0 and return False if it is.
+            #
+            # on hindsight the brute-forcey way while more detour-y, probably easier to code. haha.
+            word_list_w_wildcard = [i for i in word_list_of_same_length if
+                                    (i.find(word_split[0], 0,
+                                            index_of_wildcard) != -1)
+                                    and
+                                    (i.find(
+                                        word_split[1], index_of_wildcard+1, len(word)) != -1)
+                                    ]
+            # if word_list_w_wildcard has 0 length, return False
+            if len(word_list_w_wildcard) == 0:
+                return False
+            # but, if word_list_w_wildcard has words in it.
+            # I'll consolidate all the letters which are in the same position as '*'
+            # and if any of the letters are vowels,
+            # i'll consolidate their quantity in dictionary 'aeiou'
+            for j in word_list_w_wildcard:
+                if j[index_of_wildcard] in aeoiu.keys():
+                    aeoiu[j[index_of_wildcard]] += 1
+            # if there are no words w any vowels in that particular position occupied by '*',
+            # the sum of all the quantity will be 0
+            if sum(aeoiu.values()) == 0:
+                return False
+        else:
+            # if no '*' are used, just check if the word exists in the list of words that has the same length
+            if word not in word_list_of_same_length:
+                return False
+        return True
+
+    if (check_hand(word_dic) and check_word_list(word, word_list)) == True:
+        return True
+    else:
+        return False
 
 #
 # Problem #5: Playing a hand
