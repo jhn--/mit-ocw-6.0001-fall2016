@@ -14,7 +14,7 @@ import string
 VOWELS = 'aeiou'
 CONSONANTS = 'bcdfghjklmnpqrstvwxyz'
 HAND_SIZE = 6  # reduce from 7 to make space for asterix '*'
-
+YES = ['y', 'yes', 'Y', 'YES']
 SCRABBLE_LETTER_VALUES = {
     'a': 1, 'b': 3, 'c': 3, 'd': 2, 'e': 1, 'f': 4, 'g': 2, 'h': 4, 'i': 1, 'j': 8, 'k': 5, 'l': 1, 'm': 3, 'n': 1, 'o': 1, 'p': 3, 'q': 10, 'r': 1, 's': 1, 't': 1, 'u': 1, 'v': 4, 'w': 4, 'x': 8, 'y': 4, 'z': 10
 }
@@ -132,11 +132,13 @@ def display_hand(hand):
 
     hand: dictionary (string -> int)
     """
-
+    display = []
     for letter in hand.keys():
         for j in range(hand[letter]):
-            print(letter, end=' ')      # print all on the same line
-    print()                              # print an empty line
+            display.append(letter)
+            # print(letter, end=' ')      # print all on the same line
+    # print()                              # print an empty line
+    return (' ').join(display)
 
 #
 # Make sure you understand how this function works and what it does!
@@ -379,8 +381,7 @@ def play_hand(hand, word_list):
     # As long as there are still letters left in the hand:
     while calculate_handlen(hand) != 0:
         # Display the hand
-        hand = deal_hand(HAND_SIZE)
-        print(f'Current Hand: {display_hand(hand)}')
+        print(f'\nCurrent Hand: {display_hand(hand)}')
         # Ask user for input
         word = input(
             "Enter word, or \"!!\" to indicate  that you are finished: ")
@@ -442,7 +443,19 @@ def substitute_hand(hand, letter):
     returns: dictionary (string -> int)
     """
 
-    pass  # TO DO... Remove this line when you implement this function
+    # pass  # TO DO... Remove this line when you implement this function
+    from random import choice
+
+    # number of occurences for the letter we're replacing
+    letter_count = hand[letter]
+    new_hand = hand.copy()  # create a shallow copy of hand
+    # select from list of letters there are not in hand
+    all_letters = VOWELS + CONSONANTS  # create a string of all vowels and consonants
+    # randomly choose a letter from all_letters which do not exist in hand
+    sub_letter = choice([i for i in all_letters if i not in hand.keys()])
+    del new_hand[letter]  # delete the letter we're replacing
+    new_hand[sub_letter] = letter_count  # add the newly added letter
+    return new_hand
 
 
 def play_game(word_list):
@@ -477,7 +490,30 @@ def play_game(word_list):
     """
 
     # TO DO... Remove this line when you implement this function
-    print("play_game not implemented.")
+    # print("play_game not implemented.")
+    num_of_hands = int(input("Enter total number of hands: "))
+    hand = deal_hand(HAND_SIZE)
+    total_score = 0  # total score from the number of hands
+    count = 0  # count the number of hands played
+    while count < num_of_hands:  # while the number of hands played is less than the number of hands we want to play
+        has_sub_letter = False  # hasn't substitute letter yet
+        print(f'Current Hand: {display_hand(hand)}\n')  # show the hand
+        if has_sub_letter == False:  # if the letter substitution has not been done
+            while input("Would you like to substitute a letter? ").lower() not in YES:
+                letter_to_sub = input(
+                    "Which letter would you like to replace: ").lower()
+                hand = substitute_hand(hand, letter_to_sub)
+                has_sub_letter = True
+            score = play_hand(hand, word_list)
+            if count < num_of_hands:
+                replay = input("Would you like to replay the hand? ").lower()
+                if replay not in YES:
+                    count += 1
+                    total_score += score
+                    hand = deal_hand(HAND_SIZE)
+        print(f'Total score for this hand: {score}')
+    print(f'----------')
+    print(f'Total score over all hands: {total_score}')
 
 
 #
